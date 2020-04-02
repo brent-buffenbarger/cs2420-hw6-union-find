@@ -1,6 +1,6 @@
 public class DisjSet {
 
-	private int[] set;
+	public int[] set;
 
 	/**
 	 *. Default constructor
@@ -9,7 +9,7 @@ public class DisjSet {
 		// initialize the set array with 'elements' number of indices
 		set = new int[elements];
 		// fill each index in 'set' with -1 because each index will start as a root
-		for(int i = 0; i < elements; i++)
+		for(int i = 0; i < set.length; i++)
 			set[i] = -1;
 	}
 
@@ -19,6 +19,8 @@ public class DisjSet {
 	 * 
 	 */
 	public void union(int root1, int root2) {
+		if(root1 == root2) return; // base case to just return when roots are same, we don't need to do anything if they are
+		
 		//Check to see which root is deeper
 		if(set[root1] > set[root2]) {           // root2 is deeper in this case since depth of roots is represented as a  negative
 			set[root1] = root2;             // since root1 is deeper, we will assign the root of root1 as `root2`
@@ -87,7 +89,7 @@ public class DisjSet {
 
 		// Creating a new set to make everything the root again
 		numElements = 15;
-		set = new DisjSet(numElements);
+		set = new DisjSet(numElements); // rest the Disjoint set
 
 		// Test to make sure that 0 is the root  if every thing is joined 1 by 1 (1U0, 2U1, 3U2...set.length-1 U set.length-2)
 		for(int i = 1; i < set.set.length; i++) {
@@ -95,12 +97,28 @@ public class DisjSet {
 			assertTest(set.find(i), 0, "Expected the root of " + i  + " to be 0 but found " + set.find(i)); 
 		}
 
-		set = new DisjSet(numElements);
 		// Test to make sure that i is the root of i - 1 if every thing is joined 1 by 1 (0U1, 1U2, 2U3...set.length-2 U set.length-1)
+		set = new DisjSet(numElements); // reset the DisjointSet
 		for(int i = 1; i < set.set.length; i++) {
 			set.union(set.find(i - 1), set.find(i));
 			assertTest(set.find(i - 1), i, "Expected the root of " + (i - 1) + " to be 0 but found " + set.find(i - 1)); 
 		}
+		
+		// Test to make sure more shallow sets get merged into deeper sets and the path compression works correctly
+		set = new DisjSet(numElements); // reset the disjoint set
+		set.union(set.find(0), set.find(1));
+		assertTest(set.find(0), 1, "Expected the root of 0 to be 1, but found: " + set.find(0));
+		set.union(set.find(2), set.find(1));
+		assertTest(set.find(2), 1, "Expected the root of 2 to be 1, but found: " + set.find(2));
+		set.union(set.find(3), set.find(2));
+		assertTest(set.find(3), 1, "Expected the root of 3 to be 1, but found: " + set.find(3));
+
+		set.union(set.find(13), set.find(14));
+		assertTest(set.find(13), 14, "Expected the root of 13 to be 14, but found: " + set.find(13));
+		
+		set.union(set.find(13), set.find(0));
+		assertTest(set.find(13), 1, "Expected the root of 13 to be 14, but found: " + set.find(14));
+	        assertTest(set.find(14), 1, "Expected the root of 14 to be 1, but found: " + set.find(14));	
 	}
 
 	/**
